@@ -1,7 +1,9 @@
 """CS 61A Presents The Game of Hog."""
 from ast import Break
+from difflib import restore
 import re
 from tkinter.messagebox import RETRY
+from unittest import result
 from dice import six_sided, four_sided, make_test_dice
 from ucb import main, trace, interact
 
@@ -169,12 +171,13 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
             score1 += prev_points(who) + bonus
             if is_swap(score1, score0):
                 score0, score1 = score1, score0
+        # call commentary function when one turn finished
+        say = say(score0, score1)
         # switch other people
         who = other(who)
         # check if someone got goal
         if score0 >= goal or score1 >= goal:
             break
-    
     """Bad version of style"""
     """Each loop finish player0 roll and player0 roll"""
     prev_one, prev_two = 0, 0
@@ -216,13 +219,6 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
         # check if any win
         if score0 >= goal or score1 >= goal:
             break
-            
-
-    # END PROBLEM 5
-    # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
-    # BEGIN PROBLEM 6
-    "*** YOUR CODE HERE ***"
-    # END PROBLEM 6
     return score0, score1
 
 
@@ -307,7 +303,19 @@ def announce_highest(who, last_score=0, running_high=0):
     """
     assert who == 0 or who == 1, 'The who argument should indicate a player.'
     # BEGIN PROBLEM 7
-    "*** YOUR CODE HERE ***"
+    
+    def say(score0, score1):
+        past_highest = running_high
+        # update running_high
+        if who == 0:
+            score = score0
+        else:
+            score = score1
+        if past_highest < score - last_score:
+            past_highest = score - last_score
+            print(f"{past_highest} point(s)! That's the biggest gain yet for Player {who}")
+        return announce_highest(who, score, past_highest)
+    return say
     # END PROBLEM 7
 
 
@@ -346,7 +354,14 @@ def make_averaged(original_function, trials_count=1000):
     3.0
     """
     # BEGIN PROBLEM 8
-    "*** YOUR CODE HERE ***"
+    def averaged_function(*args):
+        total_count = trials_count
+        sum, n = 0.0, 0
+        while n < total_count:
+            n += 1
+            sum += original_function(*args)
+        return sum / total_count
+    return averaged_function
     # END PROBLEM 8
 
 
@@ -360,7 +375,15 @@ def max_scoring_num_rolls(dice=six_sided, trials_count=1000):
     1
     """
     # BEGIN PROBLEM 9
-    "*** YOUR CODE HERE ***"
+    max_score, reasonable_rolls = 0, 0
+    n = 1
+    while n <= 10:
+        res = make_averaged(roll_dice, trials_count)(n, dice)
+        if res > max_score:
+            max_score = res
+            reasonable_rolls = n
+        n += 1
+    return reasonable_rolls
     # END PROBLEM 9
 
 
@@ -389,13 +412,13 @@ def run_experiments():
         six_sided_max = max_scoring_num_rolls(six_sided)
         print('Max scoring num rolls for six-sided dice:', six_sided_max)
 
-    if False:  # Change to True to test always_roll(8)
+    if True:  # Change to True to test always_roll(8)
         print('always_roll(8) win rate:', average_win_rate(always_roll(8)))
 
-    if False:  # Change to True to test bacon_strategy
+    if True:  # Change to True to test bacon_strategy
         print('bacon_strategy win rate:', average_win_rate(bacon_strategy))
 
-    if False:  # Change to True to test swap_strategy
+    if True:  # Change to True to test swap_strategy
         print('swap_strategy win rate:', average_win_rate(swap_strategy))
 
     if False:  # Change to True to test final_strategy
@@ -410,7 +433,10 @@ def bacon_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     rolls NUM_ROLLS otherwise.
     """
     # BEGIN PROBLEM 10
-    return 6  # Replace this statement
+    if free_bacon(opponent_score) >= cutoff:
+        return 0
+    else:
+        return num_rolls
     # END PROBLEM 10
 
 
@@ -420,7 +446,17 @@ def swap_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     non-beneficial swap. Otherwise, it rolls NUM_ROLLS.
     """
     # BEGIN PROBLEM 11
-    return 6  # Replace this statement
+    result = score + free_bacon(opponent_score)
+    if is_swap(result, opponent_score):
+        # beneficial swap happended then return 0
+        if opponent_score - result > 0:
+            return 0
+        result = opponent_score
+    # give at least 'cutoff' points
+    if result - score >= cutoff:
+        return 0
+    else:
+        return num_rolls
     # END PROBLEM 11
 
 
@@ -430,7 +466,7 @@ def final_strategy(score, opponent_score):
     *** YOUR DESCRIPTION HERE ***
     """
     # BEGIN PROBLEM 12
-    return 6  # Replace this statement
+    
     # END PROBLEM 12
 
 ##########################
