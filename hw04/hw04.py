@@ -43,13 +43,11 @@ def end(s):
 def planet(size):
     """Construct a planet of some size."""
     assert size > 0
-    "*** YOUR CODE HERE ***"
-
+    return ['planet', size]
 def size(w):
     """Select the size of a planet."""
     assert is_planet(w), 'must call size on a planet'
-    "*** YOUR CODE HERE ***"
-
+    return w[1]
 def is_planet(w):
     """Whether w is a planet."""
     return type(w) == list and len(w) == 2 and w[0] == 'planet'
@@ -104,8 +102,15 @@ def balanced(m):
     >>> check(HW_SOURCE_FILE, 'balanced', ['Index'])
     True
     """
-    "*** YOUR CODE HERE ***"
+    if is_planet(m):
+        return True
 
+    item1, item2 = end(left(m)), end(right(m))
+    L1, L2 = length(left(m)), length(right(m))
+    if total_weight(item1) * L1 == total_weight(item2) * L2:
+        return balanced(item1) and balanced(item2)
+    else:
+        return False
 def totals_tree(m):
     """Return a tree representing the mobile with its total weight at the root.
 
@@ -135,8 +140,12 @@ def totals_tree(m):
     >>> check(HW_SOURCE_FILE, 'totals_tree', ['Index'])
     True
     """
-    "*** YOUR CODE HERE ***"
-
+    if is_planet(m):
+        return tree(size(m))
+    weight = total_weight(m)
+    left_tree = totals_tree(end(left(m)))
+    right_tree = totals_tree(end(right(m))) 
+    return tree(weight, [left_tree, right_tree])
 
 def replace_leaf(t, find_value, replace_value):
     """Returns a new tree where every leaf value equal to find_value has
@@ -167,8 +176,11 @@ def replace_leaf(t, find_value, replace_value):
     >>> laerad == yggdrasil # Make sure original tree is unmodified
     True
     """
-    "*** YOUR CODE HERE ***"
-
+    childs = [replace_leaf(branch, find_value, replace_value) for branch in branches(t)]
+    if label(t) == find_value and is_leaf(t):
+        return tree(replace_value, childs)
+    else:
+        return tree(label(t), childs)
 
 def preorder(t):
     """Return a list of the entries in this tree in the order that they
@@ -180,8 +192,11 @@ def preorder(t):
     >>> preorder(tree(2, [tree(4, [tree(6)])]))
     [2, 4, 6]
     """
-    "*** YOUR CODE HERE ***"
-
+    ans = [label(t)]
+    for branch in branches(t):
+        ans += preorder(branch)
+    return ans
+    
 
 def has_path(t, phrase):
     """Return whether there is a path in a tree where the entries along the path
@@ -213,7 +228,13 @@ def has_path(t, phrase):
     """
     assert len(phrase) > 0, 'no path for empty phrases.'
     "*** YOUR CODE HERE ***"
-
+    if len(phrase) == 1:
+        return label(t) == phrase
+    flag = False
+    for branch in branches(t):
+        if label(t) == phrase[0:1]:
+            flag = flag or has_path(branch, phrase[1:])
+    return flag
 
 def interval(a, b):
     """Construct an interval from a to b."""
