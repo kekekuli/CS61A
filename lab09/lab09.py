@@ -7,9 +7,19 @@ def convert_link(link):
     >>> convert_link(Link.empty)
     []
     """
-    "*** YOUR CODE HERE ***"
-
-
+    # iterative version
+    def f1(link):
+        res = []
+        while link is not Link.empty:
+            res.append(link.first)
+            link = link.rest
+        return res
+    # recursive version
+    def f2(link):
+        if link is not Link.empty:
+            return [link.first] + f2(link.rest)
+        return []
+    return f2(link)
 def every_other(s):
     """Mutates a linked list so that all the odd-indiced elements are removed
     (using 0-based indexing).
@@ -27,8 +37,10 @@ def every_other(s):
     >>> singleton
     Link(4)
     """
-    "*** YOUR CODE HERE ***"
-
+    if s is Link.empty or s.rest is Link.empty:
+        return 
+    every_other(s.rest.rest)
+    s.rest = s.rest.rest
 
 def label_squarer(t):
     """Mutates a Tree t by squaring all its elements.
@@ -38,8 +50,9 @@ def label_squarer(t):
     >>> t
     Tree(1, [Tree(9, [Tree(25)]), Tree(49)])
     """
-    "*** YOUR CODE HERE ***"
-
+    t.label = t.label * t.label
+    for b in t.branches:
+        label_squarer(b)
 
 def cumulative_mul(t):
     """Mutates t so that each node's label becomes the product of all labels in
@@ -50,8 +63,10 @@ def cumulative_mul(t):
     >>> t
     Tree(105, [Tree(15, [Tree(5)]), Tree(7)])
     """
-    "*** YOUR CODE HERE ***"
-
+    for b in t.branches:
+        cumulative_mul(b)
+    for b in t.branches:
+        t.label = t.label * b.label
 
 def has_cycle(link):
     """Return whether link contains a cycle.
@@ -67,7 +82,13 @@ def has_cycle(link):
     >>> has_cycle(u)
     False
     """
-    "*** YOUR CODE HERE ***"
+    copy = link
+    while copy is not Link.empty:
+        copy = copy.rest
+        if copy is link:
+            return True
+    
+    return False
 
 def has_cycle_constant(link):
     """Return whether link contains a cycle.
